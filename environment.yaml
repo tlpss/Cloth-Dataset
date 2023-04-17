@@ -5,25 +5,19 @@
 # to update: conda env update -f environment.yaml
 name: cloth-dataset
 channels:
-  - pytorch
   - conda-forge
 dependencies:
   - python=3.10
-  - pytorch
-  - cudatoolkit=11.3
-  - torchvision
   - pip
   - pip:
     - numpy
     - matplotlib
     - scipy
-    - wandb
-    - pytorch-lightning
     - imageio
-    - albumentations
-    - timm
-    - pytest
+    - opencv-contrib-python # tested with 4.7.0.72
     - pre-commit
     - mypy
-    - darglint
-    - -e cloth-dataset/
+    - -e airo-mono/airo-camera-toolkit
+    - -e airo-mono/airo-dataset-tools
+    - -e airo-mono/airo-typing
+    - -e .
