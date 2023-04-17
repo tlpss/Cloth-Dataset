@@ -5,7 +5,9 @@ from airo_camera_toolkit.interfaces import RGBDCamera
 from airo_camera_toolkit.calibration.fiducial_markers import detect_aruco_markers, detect_charuco_corners, get_pose_of_charuco_board, AIRO_DEFAULT_ARUCO_DICT, AIRO_DEFAULT_CHARUCO_BOARD
 from airo_camera_toolkit.utils import ImageConverter
 import cv2 
-from airo_typing import HomogeneousMatrixType
+from cloth_dataset.calibration import collect_click_points_on_image
+from airo_camera_toolkit.reprojection import reproject_to_frame
+from airo_typing import HomogeneousMatrixType, Vector3DArrayType
 import loguru
 
 logger = loguru.logger
@@ -65,9 +67,8 @@ class ClothDatasetCapturer:
         charuco_pose = get_pose_of_charuco_board(charuco_result, self.charuco_board, intrinsics)
         return charuco_pose
         
-    def camera_setup(self):
-        # determine camera extrinsics
-        desired_camera_position = self.sample_camera_pose()
+
+    def setup_camera_pose(self,desired_camera_position):
         
         #desired orientation:
         # 1. look at the origin of the marker
@@ -82,6 +83,7 @@ class ClothDatasetCapturer:
             charuco_pose = self._get_charuco_pose(image)
             if charuco_pose is None:
                 logger.info("No charuco board detected")
+                image = cv2.resize(image, (1280,720))
                 cv2.imshow("Camera pose", image)
                 cv2.waitKey(1)
                 continue
@@ -94,18 +96,46 @@ class ClothDatasetCapturer:
                 self.camera_extrinsics = charuco_pose
                 logger.info("Camera is in place.")
 
+            image = cv2.resize(image, (1280,720))
             cv2.imshow("Camera pose", image)
             if cv2.waitKey(1) & 0xFF == ord('s'):
                 if not camera_is_in_place:
                     logger.error("Camera is not in place. Please try again.")
                     continue
-        
-                # TODO: write the camera extrinsics to a metafile
-        
-            
-        # determine cloth area
-        #TODO:
+                break
 
+        # TODO: write the camera extrinsics to a metafile
+        return charuco_pose
+    
+    def determine_folding_area_polygon(self, extrinsics: HomogeneousMatrixType) -> Vector3DArrayType:
+        image = self._camera.get_rgb_image()
+        depth_map = self._camera.get_depth_map()
+        image = ImageConverter.from_numpy_format(image).image_in_opencv_format
+
+        while True:
+            clicked_points = collect_click_points_on_image(image)
+            if len(clicked_points) != 4:
+                logger.error("Please click exactly 4 points")
+                continue
+            confirmation = input("Is this a quadrilateral that covers the cloth folding area? (y/n)")
+            if confirmation == "y":
+                break
+            else:
+                continue
+    
+        area_corners = reproject_to_frame(clicked_points,self._camera.intrinsics_matrix(),extrinsics,depth_map)
+        return area_corners
+
+    
+
+
+    def camera_setup(self):
+        # determine camera extrinsics
+        desired_camera_position = self.sample_camera_pose()
+        extrinsics = self.setup_camera_pose(desired_camera_position)
+        
+        self.area_corners = self.determine_folding_area_polygon(extrinsics)
+            
 
     def capture_cloth_data_at_location(self):
         n_cloth_items = None
@@ -162,8 +192,6 @@ class ClothDatasetCapturer:
 
     
 
-def is_2dpoint_in_2dpolygon(point, polygon_points):
-    pass
 
 
 @dataclass
