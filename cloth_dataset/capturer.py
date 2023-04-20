@@ -65,6 +65,8 @@ class ClothDatasetCapturer:
 
         }
 
+        self.zed_camera_extrinsics = None
+
 
 
     def _get_charuco_pose(self,image):
@@ -128,40 +130,16 @@ class ClothDatasetCapturer:
         #TODO: save calibration image for all cameras.
         return charuco_pose
     
-    def determine_folding_area_polygon(self, extrinsics: HomogeneousMatrixType) -> Vector3DArrayType:
-        image = self.zed_camera.get_rgb_image()
-        depth_map = self.zed_camera.get_depth_map()
-        image = ImageConverter.from_numpy_format(image).image_in_opencv_format
-
-        while True:
-            clicked_points = collect_click_points_on_image(image)
-            if len(clicked_points) != 4:
-                logger.error("Please click exactly 4 points")
-                continue
-            confirmation = input("Is this a quadrilateral that covers the cloth folding area? (y/n)")
-            if confirmation == "y":
-                break
-            else:
-                continue
-    
-        print(clicked_points)
-        area_corners = reproject_to_frame(clicked_points,self.zed_camera.intrinsics_matrix(),np.linalg.inv(extrinsics),depth_map)
-        return area_corners
-
-    
-
 
     def camera_setup(self):
         # determine camera extrinsics
         desired_camera_position = self.sample_camera_position()
         extrinsics = self.setup_camera_pose(desired_camera_position)
-        
-        self.area_corners = self.determine_folding_area_polygon(extrinsics)
-            
+        self.zed_camera_extrinsics = extrinsics           
 
     def capture_cloth_data_at_location(self, type:str, location_id: int, n_cloth_items: int, n_images_per_cloth_item: int):
 
-        assert self.camera_extrinsics is not None
+        assert self.zed_camera_extrinsics is not None
 
 
         for cloth_id in range(n_cloth_items):
