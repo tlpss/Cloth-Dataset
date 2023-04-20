@@ -18,6 +18,7 @@ dependencies:
     - pre-commit
     - mypy
     - -e airo-mono/airo-camera-toolkit
+    - -e airo-mono/airo-spatial-algebra
     - -e airo-mono/airo-dataset-tools
     - -e airo-mono/airo-typing
     - -e .

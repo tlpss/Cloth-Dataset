@@ -47,6 +47,6 @@ def collect_click_points_on_image(image: OpenCVIntImageType) -> np.ndarray:
     return clicked_image_points
 
 if __name__ == "__main__":
-    image = np.ones((1000, 2000,3), dtype=np.uint8)
+    image = np.ones((5000, 1000,3), dtype=np.uint8)
     clicked_points = collect_click_points_on_image(image)
     print(clicked_points)
