@@ -58,16 +58,16 @@ class SceneMetaData:
 
 DatasetConfig = {
     "train": {
-        "tshirts": 20,
-        "shorts": 20,
-        "towels": 20,
-        "boxershorts": 20,
+        "tshirts": 15,
+        "shorts": 8,
+        "towels": 15,
+        "boxershorts": 11,
     },
     "test": {
-        "tshirts": 15,
-        "shorts": 15,
-        "towels": 15,
-        "boxershorts": 15,
+        "tshirts": 20,
+        "shorts": 10,
+        "towels": 20,
+        "boxershorts": 11,
     },
     "development": {
         "tshirts": 2,
