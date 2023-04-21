@@ -1,6 +1,3 @@
-
-import enum
-
 CLOTH_CATEGORIES = ("towels", "shorts", "tshirts", "boxershorts")
 
 TOWEL_KEYPOINTS = [
