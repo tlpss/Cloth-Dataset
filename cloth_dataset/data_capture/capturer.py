@@ -65,7 +65,7 @@ DatasetConfig = {
     },
     "test": {
         "tshirts": 20,
-        "shorts": 10,
+        "shorts": 9,
         "towels": 20,
         "boxershorts": 11,
     },
@@ -284,7 +284,6 @@ class ClothDatasetCapturer:
         z_distance = np.random.uniform(0.5, 1.0)
         y_distance = np.random.uniform(-0.2, -0.6)
         x_distance = np.random.uniform(-0.1, 0.1)
-        return np.array([0, -0.2, 0.7])
         return np.array([x_distance, y_distance, z_distance])
 
 
