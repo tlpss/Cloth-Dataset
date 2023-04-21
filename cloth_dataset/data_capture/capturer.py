@@ -43,19 +43,45 @@ class SceneMetaData:
     dataset_split: str
     location_id: int
     capture_date_time: str
+    charuco_pose_in_camera_frame: HomogeneousMatrixType
 
 
+DatasetConfig = {
+    "train" :  {
+        "tshirts": 20,
+        "shorts" : 20,
+        "towels": 20,
+        "boxershorts": 20,
+    },
+    "test" : {
+        "tshirts": 15,
+        "shorts" : 15,
+        "towels": 15,
+        "boxershorts": 15,
+    },
+    "development" : {
+        "tshirts": 2,
+        "shorts" : 1,
+        "towels": 1,
+        "boxershorts": 1,
+    }
+}
 
 class ClothDatasetCapturer:
     """Scope of this capturer is to capture a set of clothes (can be multiple categories) in one scene (camera setup + environment).
     Make a new object for every time you wish to do this."""
 
     def __init__(self, zed_camera: StereoRGBDCamera, location_id: int, root_folder: str, split: str = "train") -> None:
-        self.zed_camera = zed_camera
+
+        self.n_images_per_cloth_item = 2 
+
+
+        assert split in ("train",  "test", "development")
         self.location_id = location_id
         self.root_folder = root_folder
         self.split = split
         self.data_folder = pathlib.Path(root_folder) / split / f"location_{location_id}"
+       
         if self.data_folder.exists():
             raise ValueError(f"Data folder {self.data_folder} already exists. This should not be the case..")
         self.data_folder.mkdir(parents=True, exist_ok=False)
@@ -65,7 +91,7 @@ class ClothDatasetCapturer:
         self.charuco_board = AIRO_DEFAULT_CHARUCO_BOARD
         self.aruco_dict = AIRO_DEFAULT_ARUCO_DICT
 
-
+        self.zed_camera = zed_camera
         self.zed_camera_extrinsics = None
 
 
@@ -93,7 +119,7 @@ class ClothDatasetCapturer:
 
 
         camera_is_in_place = False
-        logger.info("Please place the camera at the desired position by comparing the spherical coordinates while keeping the camera centered on the origin of the marker. Press a key to continue with the current pose.")
+        input("press enter to start camera pose setup. Press any key once the camera is positioned.")
         while True:
             image = self.zed_camera.get_rgb_image()
             image = ImageConverter.from_numpy_format(image).image_in_opencv_format
@@ -127,8 +153,17 @@ class ClothDatasetCapturer:
                 break
         cv2.destroyAllWindows()
         image = self.zed_camera.get_rgb_image()
+        image = ImageConverter.from_numpy_format(image).image_in_opencv_format
         name = "charuco_board.png"
-        #TODO: save calibration image & pose.
+        cv2.imwrite(str(self.data_folder / name), image)
+
+        input("Remove the board and press enter to continue.")
+        image = self.zed_camera.get_rgb_image()
+        image = ImageConverter.from_numpy_format(image).image_in_opencv_format
+        cv2.imwrite(str(self.data_folder / "scene.png"), image)
+
+        metadata = SceneMetaData(self.split,self.location_id,datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),charuco_pose.tolist())
+        json.dump(dataclasses.asdict(metadata), open(str(self.data_folder / "scene.json"), "w"))
 
         return charuco_center_pose
     
@@ -139,7 +174,7 @@ class ClothDatasetCapturer:
         extrinsics = self.setup_camera_pose(desired_camera_position)
         self.zed_camera_extrinsics = extrinsics           
 
-    def capture_cloth_data_at_location(self, cloth_type:str, location_id: int, n_cloth_items: int, n_images_per_cloth_item: int):
+    def capture_cloth_data_at_location(self, cloth_type:str):
 
         assert self.zed_camera_extrinsics is not None
 
@@ -147,12 +182,13 @@ class ClothDatasetCapturer:
         assert cloth_type in CLOTH_CATEGORIES
         cloth_keypoints = CATEGORY_TO_KEYPOINTS[cloth_type]
 
+        n_cloth_items = DatasetConfig[self.split][cloth_type]
+        n_images_per_cloth_item = self.n_images_per_cloth_item
         for cloth_id in range(n_cloth_items):
 
             for cloth_shot_id in range(n_images_per_cloth_item):
                 # get random cloth pose
-                cloth_pose_in_maker_frame = self.get_random_cloth_pose()
-                print(cloth_pose_in_maker_frame)
+                cloth_pose_in_maker_frame = self.sample_cloth_pose()
                 cloth_pose_in_camera_frame = self.zed_camera_extrinsics @ cloth_pose_in_maker_frame
                 should_front_be_up = np.random.uniform() > 0.4
                 logger.info(f"cloth front side shoud be up: {should_front_be_up}")
@@ -169,49 +205,46 @@ class ClothDatasetCapturer:
                     image = self.zed_camera.get_rgb_image()
                     image = ImageConverter.from_numpy_format(image).image_in_opencv_format
                     # draw cloth id and shot id
-                    image = cv2.putText(image, f"category: {cloth_type}, cloth id: {cloth_id}, shot id: {cloth_shot_id}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                    image = cv2.putText(image, f"category: {cloth_type}, cloth id: {cloth_id}/{n_cloth_items}, shot id: {cloth_shot_id}/{n_images_per_cloth_item}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2, cv2.LINE_AA)
                     # draw cloth position
                     image = draw_cloth_pose_on_image(image, cloth_pose_in_camera_frame, self.zed_camera.intrinsics_matrix())
                     for i,deformation_instruction in enumerate(deformation_instructions):
-                        image = cv2.putText(image, deformation_instruction, (10, 100 + 30*i), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+                        image = cv2.putText(image, deformation_instruction, (10, 100 + 30*i), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2, cv2.LINE_AA)
                     image = cv2.resize(image, (1280,720))
                     cv2.imshow("Cloth pose", image)
                     if cv2.waitKey(1) != -1:
                         break
 
-                # capture image
+                # capture & save images and depth maps
                 date_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
                 image_name_prefix = f"location_id_{self.location_id}_cloth_id_{cloth_id}_{date_time}"
                 image_name_prefix = str(self.data_folder / cloth_type) + "/" + image_name_prefix
+                
                 image = self.zed_camera.get_rgb_image()
                 image = ImageConverter.from_numpy_format(image).image_in_opencv_format
+
                 depth_map = self.zed_camera.get_depth_map()
+                depth_image = self.zed_camera.get_depth_image()
+                cv2.imwrite(f"{image_name_prefix}_depth_image_zed.png", depth_image)
+
                 right_image = self.zed_camera.get_rgb_image("right")
                 right_image = ImageConverter.from_numpy_format(right_image).image_in_opencv_format
-           
+                                          
                 meta_data = ImageMetaData(self.split,self.location_id,cloth_type,cloth_id,date_time,"ZED2i")
-                imageio.imsave(f"{image_name_prefix}_zed_rgb.png", image)
-                np.save(f"{image_name_prefix}_zed_depth_map.npy", depth_map)
-                imageio.imsave(f"{image_name_prefix}_zed_right.png", right_image)
+                logger.debug("started saving images")
+                cv2.imwrite(f"{image_name_prefix}_rgb_zed.png", image)
+                np.save(f"{image_name_prefix}_depth_map_zed.npy", depth_map)
+                cv2.imwrite(f"{image_name_prefix}_rgb_zed_right.png", right_image)
                 json.dump(dataclasses.asdict(meta_data), open(f"{image_name_prefix}_meta_data.json", "w"))
+                logger.debug("finished saving images")
                 
-            # wait for user to press key to confirm cloth pose
 
-
-        pass
-
-    def get_random_cloth_pose(self) -> HomogeneousMatrixType:
-        # get random cloth pose
-        
-        # sample a 2D pose for the cloth
-        # has to fit in the folding area
+    def sample_cloth_pose(self) -> HomogeneousMatrixType:
         random_orientation = np.random.uniform(0,2*np.pi)
         position_range = 0.2
         x = np.random.uniform(-position_range,position_range)
         y = np.random.uniform(-position_range,position_range)
         return SE3Container.from_euler_angles_and_translation(np.array([0,0,random_orientation]), np.array([x,y,0])).homogeneous_matrix
-
-
 
     def sample_camera_position(self) -> Vector3DType:
         z_distance = np.random.uniform(0.5, 1.0)
@@ -219,7 +252,6 @@ class ClothDatasetCapturer:
         x_distance = np.random.uniform(-0.1, 0.1)
         return np.array([0,-0.2,0.7])
         return np.array([x_distance, y_distance, z_distance])
-
     
 
 def draw_cloth_pose_on_image(image, cloth_pose_in_camera_frame, camera_intrinsics):
@@ -233,28 +265,14 @@ def draw_cloth_pose_on_image(image, cloth_pose_in_camera_frame, camera_intrinsic
     return image
 
 
-@dataclass
-class RandomizationParameters:
-    pass
-
-@dataclass
-class ClothDatasetCapturerConfig:
-    cloth_types: str 
-    data_folder: str
-    randomization_parameters: RandomizationParameters
-
 
 if __name__ == "__main__":
+    #TODO: USE NEURAL DEPTH MODE
 
-    # determine cloth type
-    # specify folder to store data to
-    # configure randomization parameters
-    # configure camera parameters
-
-    # create capturer
-
-    # start capturing
     camera = Zed2i(resolution=Zed2i.RESOLUTION_2K,fps = 15, depth_mode= Zed2i.PERFORMANCE_DEPTH_MODE)
-    capturer = ClothDatasetCapturer(camera,0,'TestDataset', 'train')
+    capturer = ClothDatasetCapturer(camera,0,'TestDataset', 'development')
     capturer.camera_setup()
-    capturer.capture_cloth_data_at_location("tshirts",0,3,2)
+    capturer.capture_cloth_data_at_location("tshirts")
+    capturer.capture_cloth_data_at_location("shorts")
+    capturer.capture_cloth_data_at_location("towels")
+    capturer.capture_cloth_data_at_location("boxershorts")
