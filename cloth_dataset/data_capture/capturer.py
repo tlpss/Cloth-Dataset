@@ -197,9 +197,9 @@ class ClothDatasetCapturer:
 
         n_cloth_items = DatasetConfig[self.split][cloth_type]
         n_images_per_cloth_item = self.n_images_per_cloth_item
-        for cloth_id in range(n_cloth_items):
+        for cloth_id in range(1,n_cloth_items+1):
 
-            for cloth_shot_id in range(n_images_per_cloth_item):
+            for cloth_shot_id in range(1,n_images_per_cloth_item+1):
                 # get random cloth pose
                 cloth_pose_in_maker_frame = self.sample_cloth_pose()
                 cloth_pose_in_camera_frame = self.zed_camera_extrinsics @ cloth_pose_in_maker_frame
@@ -220,7 +220,7 @@ class ClothDatasetCapturer:
                     # draw cloth id and shot id
                     image = cv2.putText(
                         image,
-                        f"category: {cloth_type}, cloth id: {cloth_id}/{n_cloth_items}, shot id: {cloth_shot_id}/{n_images_per_cloth_item}",
+                        f"category: {cloth_type}, cloth id: {cloth_id}/{n_cloth_items}, shot id: {cloth_shot_id}/{n_images_per_cloth_item}. Cloth front side should be up: {should_front_be_up}",
                         (10, 30),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         1,
@@ -250,7 +250,7 @@ class ClothDatasetCapturer:
 
                 # capture & save images and depth maps
                 date_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                image_name_prefix = f"location_id_{self.location_id}_cloth_id_{cloth_id}_{date_time}"
+                image_name_prefix = f"{date_time}"
                 image_name_prefix = str(self.data_folder / cloth_type) + "/" + image_name_prefix
 
                 image = self.zed_camera.get_rgb_image()
