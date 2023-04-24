@@ -32,7 +32,7 @@ def _sample_corner_bend_deformation(corner_list: list[str]) -> str:
     direction = np.random.choice(["left", "center", "right"])
     distance = np.random.choice(["short", "long"])
     up_or_down = np.random.choice(["up", "down"])
-    return f"bend corner <{corner}> <{up_or_down}> with direction <{direction}> and radius <{distance}>"
+    return f"bend corner <{corner}> <{up_or_down}> with radius <{distance}>"
 
 
 def _sample_side_bend_deformation(corner_list: list[str]) -> str:
