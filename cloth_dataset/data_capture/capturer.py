@@ -3,7 +3,7 @@ import datetime
 import json
 import pathlib
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Union
 
 import cv2
 import loguru
@@ -24,8 +24,9 @@ from airo_spatial_algebra import SE3Container
 from airo_typing import HomogeneousMatrixType, Vector3DType
 
 from cloth_dataset.data_capture.deformation_sampling import sample_deformation_instructions
-from cloth_dataset.keypoint_names import CATEGORY_TO_KEYPOINTS, CLOTH_CATEGORIES
 from cloth_dataset.data_capture.ip_camera import IPCamera
+from cloth_dataset.keypoint_names import CATEGORY_TO_KEYPOINTS, CLOTH_CATEGORIES
+
 np.set_printoptions(precision=3)
 
 logger = loguru.logger
@@ -84,7 +85,14 @@ class ClothDatasetCapturer:
     """Scope of this capturer is to capture a set of clothes (can be multiple categories) in one scene (camera setup + environment).
     Make a new object for every time you wish to do this."""
 
-    def __init__(self, zed_camera: StereoRGBDCamera, location_id: int, root_folder: str, split: str = "train", ip_camera: IPCamera = None) -> None:
+    def __init__(
+        self,
+        zed_camera: StereoRGBDCamera,
+        location_id: int,
+        root_folder: str,
+        split: str = "train",
+        ip_camera: IPCamera = None,
+    ) -> None:
 
         self.n_images_per_cloth_item = 2
 
@@ -107,7 +115,6 @@ class ClothDatasetCapturer:
         self.zed_camera_extrinsics = None
 
         self.ip_camera = ip_camera
-
 
     def _get_charuco_pose(self, image):
         intrinsics = self.zed_camera.intrinsics_matrix()
@@ -184,7 +191,10 @@ class ClothDatasetCapturer:
         image = ImageConverter.from_numpy_format(image).image_in_opencv_format
         cv2.imwrite(str(self.data_folder / "scene.png"), image)
         metadata = SceneMetaData(
-            self.split, self.location_id, datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"), charuco_pose.tolist(),
+            self.split,
+            self.location_id,
+            datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),
+            charuco_pose.tolist(),
         )
         if self.ip_camera:
             ip_cam_image = self.ip_camera.get_rgb_image()
@@ -213,9 +223,9 @@ class ClothDatasetCapturer:
 
         n_cloth_items = DatasetConfig[self.split][cloth_type]
         n_images_per_cloth_item = self.n_images_per_cloth_item
-        for cloth_id in range(1,n_cloth_items+1):
+        for cloth_id in range(1, n_cloth_items + 1):
 
-            for cloth_shot_id in range(1,n_images_per_cloth_item+1):
+            for cloth_shot_id in range(1, n_images_per_cloth_item + 1):
                 # get random cloth pose
                 cloth_pose_in_maker_frame = self.sample_cloth_pose()
                 cloth_pose_in_camera_frame = self.zed_camera_extrinsics @ cloth_pose_in_maker_frame
@@ -278,8 +288,6 @@ class ClothDatasetCapturer:
 
                 right_image = self.zed_camera.get_rgb_image("right")
                 right_image = ImageConverter.from_numpy_format(right_image).image_in_opencv_format
-
-    
 
                 meta_data = ImageMetaData(self.split, self.location_id, cloth_type, cloth_id, date_time, "ZED2i")
                 logger.debug("started saving images")

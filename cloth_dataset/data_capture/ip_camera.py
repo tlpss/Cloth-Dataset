@@ -1,5 +1,5 @@
 import cv2
-from airo_camera_toolkit.utils import ImageConverter
+
 
 class IPCamera:
     def __init__(self, ip_address: str) -> None:
@@ -20,4 +20,3 @@ if __name__ == "__main__":
     cv2.imwrite("test.jpg", img)
     input("k")
     k = cv2.waitKey(50)
-
