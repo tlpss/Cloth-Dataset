@@ -95,6 +95,8 @@ class ClothDatasetCapturer:
     ) -> None:
 
         self.n_images_per_cloth_item = 2
+        self.zed_camera_extrinsics = None
+
 
         assert split in ("train", "test", "development")
         self.location_id = location_id
@@ -103,16 +105,24 @@ class ClothDatasetCapturer:
         self.data_folder = pathlib.Path(root_folder) / split / f"location_{location_id}"
 
         if self.data_folder.exists():
-            raise ValueError(f"Data folder {self.data_folder} already exists. This should not be the case..")
-        self.data_folder.mkdir(parents=True, exist_ok=False)
-        for category in CLOTH_CATEGORIES:
-            (self.data_folder / category).mkdir(parents=True, exist_ok=False)
+            logger.warning("data folder already exists. Will overwrite existing data...")
+            charuco_pose = json.load(open(self.data_folder /  "scene.json"))
+            charuco_pose = np.array(charuco_pose["charuco_pose_in_camera_frame"])
+            print(charuco_pose)
+            charuco_center_pose_in_default_frame = SE3Container.from_euler_angles_and_translation(
+                np.array([np.pi, 0, 0]), np.array([0.14, 0.10, 0])
+            )
+            charuco_center_pose = charuco_pose @ charuco_center_pose_in_default_frame.homogeneous_matrix
+            self.zed_camera_extrinsics = charuco_center_pose
+        else:
+            self.data_folder.mkdir(parents=True, exist_ok=False)
+            for category in CLOTH_CATEGORIES:
+                (self.data_folder / category).mkdir(parents=True, exist_ok=False)
 
         self.charuco_board = AIRO_DEFAULT_CHARUCO_BOARD
         self.aruco_dict = AIRO_DEFAULT_ARUCO_DICT
 
         self.zed_camera = zed_camera
-        self.zed_camera_extrinsics = None
 
         self.ip_camera = ip_camera
 
@@ -186,22 +196,29 @@ class ClothDatasetCapturer:
             name = "charuco_board_smartphone.png"
             cv2.imwrite(str(self.data_folder / name), ip_cam_image)
 
-        input("Remove the board and press enter to continue.")
-        image = self.zed_camera.get_rgb_image()
-        image = ImageConverter.from_numpy_format(image).image_in_opencv_format
-        cv2.imwrite(str(self.data_folder / "scene.png"), image)
+
+
         metadata = SceneMetaData(
             self.split,
             self.location_id,
             datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S"),
             charuco_pose.tolist(),
         )
+
+        input("Remove the board and press enter to continue.")
+        image = self.zed_camera.get_rgb_image()
+        image = ImageConverter.from_numpy_format(image).image_in_opencv_format
+        cv2.imwrite(str(self.data_folder / "scene.png"), image)
+
         if self.ip_camera:
-            ip_cam_image = self.ip_camera.get_rgb_image()
+            ip_scene_image = self.ip_camera.get_rgb_image()
             name = "scene_smartphone.png"
-            cv2.imwrite(str(self.data_folder / name), ip_cam_image)
+            cv2.imwrite(str(self.data_folder / name), ip_scene_image)
             smartphone_charuco_pose = self._get_charuco_pose(ip_cam_image)
-            metadata.charuco_pose_in_smarthpone_frame = smartphone_charuco_pose.tolist()
+            if smartphone_charuco_pose is None:
+                logger.error("No charuco board detected on smartphone image.")
+            else:
+                metadata.charuco_pose_in_smarthpone_frame = smartphone_charuco_pose.tolist()
 
         json.dump(dataclasses.asdict(metadata), open(str(self.data_folder / "scene.json"), "w"))
 
@@ -337,8 +354,9 @@ def draw_cloth_pose_on_image(image, cloth_pose_in_camera_frame, camera_intrinsic
 if __name__ == "__main__":
     # TODO: USE NEURAL DEPTH MODE
 
-    camera = Zed2i(resolution=Zed2i.RESOLUTION_2K, fps=15, depth_mode=Zed2i.PERFORMANCE_DEPTH_MODE)
-    capturer = ClothDatasetCapturer(camera, 0, "TestDataset", "development")
+    camera = Zed2i(resolution=Zed2i.RESOLUTION_2K, fps=15, depth_mode=Zed2i.NEURAL_DEPTH_MODE)
+    smartphone_camera = IPCamera("192.168.1.11")
+    capturer = ClothDatasetCapturer(camera, 7, "Dataset", "test", smartphone_camera)
     capturer.camera_setup()
     capturer.capture_cloth_data_at_location("tshirts")
     capturer.capture_cloth_data_at_location("shorts")
