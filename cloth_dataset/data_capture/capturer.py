@@ -97,7 +97,6 @@ class ClothDatasetCapturer:
         self.n_images_per_cloth_item = 2
         self.zed_camera_extrinsics = None
 
-
         assert split in ("train", "test", "development")
         self.location_id = location_id
         self.root_folder = root_folder
@@ -106,7 +105,7 @@ class ClothDatasetCapturer:
 
         if self.data_folder.exists():
             logger.warning("data folder already exists. Will overwrite existing data...")
-            charuco_pose = json.load(open(self.data_folder /  "scene.json"))
+            charuco_pose = json.load(open(self.data_folder / "scene.json"))
             charuco_pose = np.array(charuco_pose["charuco_pose_in_camera_frame"])
             print(charuco_pose)
             charuco_center_pose_in_default_frame = SE3Container.from_euler_angles_and_translation(
@@ -195,8 +194,6 @@ class ClothDatasetCapturer:
             ip_cam_image = self.ip_camera.get_rgb_image()
             name = "charuco_board_smartphone.png"
             cv2.imwrite(str(self.data_folder / name), ip_cam_image)
-
-
 
         metadata = SceneMetaData(
             self.split,

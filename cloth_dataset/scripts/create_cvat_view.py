@@ -1,12 +1,12 @@
+import os
 import pathlib
-import os 
 import shutil
 
-def create_filtered_symlink_dataset(root_dir_path: str, target_dir_for_symlinks: str, suffixes_to_symlink = [".png"]):
-    """creates a "view" on the dataset by creating symlinks to the images with the appropriate suffixes in the dataset.
-    This is useful for labeling: cvat cannot deal with non-image files and we also don't want to label right views manually for example."""
+
+def create_filtered_symlink_dataset(root_dir_path: str, target_dir_for_symlinks: str, suffixes_to_symlink=[".png"]):
+    """creates a "view" on the dataset by creating symlinks to the images with the appropriate suffixes in the dataset.This is useful for labeling: cvat cannot deal with non-image files and we also don't want to label right views manually for example."""
     # traverse all files in the root_dir
-    # find all png's 
+    # find all png's
     # create symlinks to the png's in the target_dir_for_symlinks
     # if they have suffix zed.png, ...
     root_dir = pathlib.Path(root_dir_path)
@@ -25,23 +25,28 @@ def create_filtered_symlink_dataset(root_dir_path: str, target_dir_for_symlinks:
             for suffix in suffixes_to_symlink:
                 if relative_file_path.endswith(suffix):
                     # cannot make symlinks, as cvat does not support them.
-                    shutil.copy(os.path.join(root,relative_file_path), os.path.join(symlink_dir, relative_file_path))
+                    shutil.copy(os.path.join(root, relative_file_path), os.path.join(symlink_dir, relative_file_path))
 
-
-
-    
 
 if __name__ == "__main__":
-    """ example usage:
+    """example usage:
     python cloth_dataset/scripts/create_cvat_view.py <root_dir_of_dataset> ./cvat_dataset_view -s rgb_zed.png -s rgb_smartphone.png
     """
     import click
+
     @click.command()
     @click.argument("root_dir_path", type=click.Path(exists=True))
     @click.argument("target_dir_for_symlinks", type=str)
-    @click.option("--suffixes_to_symlink","-s",multiple=True,type=str,help="suffixes (including extension) of files to symlink")
-    def cli_create_filtered_symlink_dataset(root_dir_path: str, target_dir_for_symlinks: str, suffixes_to_symlink = [".png"]):
+    @click.option(
+        "--suffixes_to_symlink",
+        "-s",
+        multiple=True,
+        type=str,
+        help="suffixes (including extension) of files to symlink",
+    )
+    def cli_create_filtered_symlink_dataset(
+        root_dir_path: str, target_dir_for_symlinks: str, suffixes_to_symlink=[".png"]
+    ):
         create_filtered_symlink_dataset(root_dir_path, target_dir_for_symlinks, suffixes_to_symlink)
 
     cli_create_filtered_symlink_dataset()
-

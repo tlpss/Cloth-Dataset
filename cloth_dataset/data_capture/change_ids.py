@@ -1,8 +1,9 @@
 import os
-import json
 
 if __name__ == "__main__":
-    root_folder = "/home/tlips/Onedrive_UGent/A-PHD/SyntheticClothJournal/Cloth-Dataset/Dataset/train/location_1/boxershorts"
+    root_folder = (
+        "/home/tlips/Onedrive_UGent/A-PHD/SyntheticClothJournal/Cloth-Dataset/Dataset/train/location_1/boxershorts"
+    )
 
     # get all the json files
     json_files = []
