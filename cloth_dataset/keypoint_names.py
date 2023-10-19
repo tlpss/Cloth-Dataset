@@ -1,20 +1,21 @@
-CLOTH_CATEGORIES = ("towels", "shorts", "tshirts", "boxershorts")
+CLOTH_CATEGORIES = ("towel", "shorts", "tshirt", "boxershorts")
+
 
 TOWEL_KEYPOINTS = [
-    "corner_0",
-    "corner_1",
-    "corner_2",
-    "corner_3",
+    "corner0",
+    "corner1",
+    "corner2",
+    "corner3",
 ]
 
-SHORT_KEYPOINTS = [
-    "left_waist",
-    "right_waist",
-    "right_pipe_outer",
-    "right_pipe_inner",
+SHORTS_KEYPOINTS = [
+    "waist_left",
+    "waist_right",
+    "pipe_right_outer",
+    "pipe_right_inner",
     "crotch",
-    "left_pipe_inner",
-    "left_pipe_outer",
+    "pipe_left_inner",
+    "pipe_left_outer",
 ]
 
 TSHIRT_KEYPOINTS = [
@@ -32,11 +33,11 @@ TSHIRT_KEYPOINTS = [
     "sleeve_left_top",
 ]
 
-BOXERSHORT_KEYPOINTS = SHORT_KEYPOINTS
+BOXERSHORT_KEYPOINTS = SHORTS_KEYPOINTS
 
 CATEGORY_TO_KEYPOINTS = {
-    "towels": TOWEL_KEYPOINTS,
-    "shorts": SHORT_KEYPOINTS,
-    "tshirts": TSHIRT_KEYPOINTS,
+    "towel": TOWEL_KEYPOINTS,
+    "shorts": SHORTS_KEYPOINTS,
+    "tshirt": TSHIRT_KEYPOINTS,
     "boxershorts": BOXERSHORT_KEYPOINTS,
 }
