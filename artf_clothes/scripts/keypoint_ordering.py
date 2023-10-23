@@ -67,55 +67,24 @@ def order_towel_keypoints(keypoints_2D, bbox):
 
 
 def order_tshirt_keypoints(keypoints_2D: np.ndarray, bbox: tuple):
-    """
-    get the two shoulder keypoints
-    determine which one has smallest U coordinate, this becomes the 'left' shoulder now.
-    does not necessarily match human intuition, but it is consistent and easy to figure out for the NN.
-    all other left-right separations can be done afterwards, main thing here is to have association between adjacent keypoints so that even for deformed pieces the model
-    estimates which shoulder is adjacent to a given armpit.
+    # left == side of which the waist kp is closest to the bottom left corner of the bbox in 2D.
+    # simply serves to break symmetries and find adjacent keypoints, does not correspond with human notion of left and right,
+    # which is determind in 3D. This can be determiend later in the pipeline if desired, once the 2D keypoints are lifted to 3D somehow.
+    # we use waist kp as this one has been estimated to be least deformed by real pipelines.
 
+    x_min, y_min, width, height = bbox
 
-    Args:
-        keypoints_2D (np.ndarray): _description_
-        bbox (tuple): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    shoulder_left_idx = TSHIRT_KEYPOINTS.index("shoulder_left")
-    shoulder_right_idx = TSHIRT_KEYPOINTS.index("shoulder_right")
-
-    neck_left_idx = TSHIRT_KEYPOINTS.index("neck_left")
-    neck_right_idx = TSHIRT_KEYPOINTS.index("neck_right")
+    bottom_left_bbox_corner = (x_min, y_min + height)
 
     waist_left_idx = TSHIRT_KEYPOINTS.index("waist_left")
     waist_right_idx = TSHIRT_KEYPOINTS.index("waist_right")
-
-    shoulder_left_2D = keypoints_2D[shoulder_left_idx]
-    keypoints_2D[shoulder_right_idx]
-
-    neck_left_2D = keypoints_2D[neck_left_idx]
-    neck_right_2D = keypoints_2D[neck_right_idx]
-
     waist_left_2D = keypoints_2D[waist_left_idx]
     waist_right_2D = keypoints_2D[waist_right_idx]
 
-    waist_center = (waist_left_2D + waist_right_2D) / 2
-    neck_center = (neck_left_2D + neck_right_2D) / 2
+    distance_waist_left = np.linalg.norm(np.array(waist_left_2D) - np.array(bottom_left_bbox_corner))
+    distance_waist_right = np.linalg.norm(np.array(waist_right_2D) - np.array(bottom_left_bbox_corner))
 
-    vertical_vector = neck_center - waist_center
-    vertical_vector /= np.linalg.norm(vertical_vector)
-
-    waist_to_left_shoulder_vector = shoulder_left_2D - waist_center
-
-    z_coord_of_cross_product = (
-        vertical_vector[0] * waist_to_left_shoulder_vector[1] - vertical_vector[1] * waist_to_left_shoulder_vector[0]
-    )
-
-    # origin  is topleft of image
-    # so positive z coord points down and implies the 'left kp' was actually on the right side of the body
-    if z_coord_of_cross_product > 0:
+    if distance_waist_left > distance_waist_right:
         should_tshirt_be_flipped = True
     else:
         should_tshirt_be_flipped = False
