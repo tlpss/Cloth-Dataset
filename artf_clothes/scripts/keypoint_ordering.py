@@ -1,6 +1,6 @@
 import numpy as np
 
-from cloth_dataset.keypoint_names import TSHIRT_KEYPOINTS
+from artf_clothes.keypoint_names import TSHIRT_KEYPOINTS
 
 
 def order_keypoints(cloth_type, keypoints_2D, bbox):

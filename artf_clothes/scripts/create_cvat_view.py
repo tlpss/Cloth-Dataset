@@ -30,7 +30,7 @@ def create_filtered_symlink_dataset(root_dir_path: str, target_dir_for_symlinks:
 
 if __name__ == "__main__":
     """example usage:
-    python cloth_dataset/scripts/create_cvat_view.py <root_dir_of_dataset> ./cvat_dataset_view -s rgb_zed.png -s rgb_smartphone.png
+    python artf_clothes/scripts/create_cvat_view.py <root_dir_of_dataset> ./cvat_dataset_view -s rgb_zed.png -s rgb_smartphone.png
     """
     import click
 

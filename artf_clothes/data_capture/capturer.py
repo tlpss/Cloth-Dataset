@@ -23,9 +23,9 @@ from airo_camera_toolkit.utils import ImageConverter
 from airo_spatial_algebra import SE3Container
 from airo_typing import HomogeneousMatrixType, Vector3DType
 
-from cloth_dataset.data_capture.deformation_sampling import sample_deformation_instructions
-from cloth_dataset.data_capture.ip_camera import IPCamera
-from cloth_dataset.keypoint_names import CATEGORY_TO_KEYPOINTS, CLOTH_CATEGORIES
+from artf_clothes.data_capture.deformation_sampling import sample_deformation_instructions
+from artf_clothes.data_capture.ip_camera import IPCamera
+from artf_clothes.keypoint_names import CATEGORY_TO_KEYPOINTS, CLOTH_CATEGORIES
 
 np.set_printoptions(precision=3)
 

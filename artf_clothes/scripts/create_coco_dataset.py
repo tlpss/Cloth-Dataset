@@ -4,8 +4,8 @@ from airo_dataset_tools.coco_tools.transform_dataset import resize_coco_keypoint
 from airo_dataset_tools.cvat_labeling.convert_cvat_to_coco import cvat_image_to_coco
 from airo_dataset_tools.data_parsers.coco import CocoKeypointsDataset
 
-from cloth_dataset import DATA_DIR
-from cloth_dataset.scripts.keypoint_ordering import order_keypoints
+from artf_clothes import DATA_DIR
+from artf_clothes.scripts.keypoint_ordering import order_keypoints
 
 # make sure the image paths are relative to the dataset root before converting to coco.
 

@@ -1,6 +1,6 @@
 from airo_dataset_tools.data_parsers.coco import CocoKeypointCategory
 
-from cloth_dataset.keypoint_names import BOXERSHORT_KEYPOINTS, SHORTS_KEYPOINTS, TOWEL_KEYPOINTS, TSHIRT_KEYPOINTS
+from artf_clothes.keypoint_names import BOXERSHORT_KEYPOINTS, SHORTS_KEYPOINTS, TOWEL_KEYPOINTS, TSHIRT_KEYPOINTS
 
 towel_category = CocoKeypointCategory(
     id=0, name="towel", keypoints=TOWEL_KEYPOINTS, skeleton=[[0, 1], [1, 2], [2, 3]], supercategory="cloth"
@@ -32,7 +32,7 @@ categories = {
 }
 
 if __name__ == "__main__":
-    from cloth_dataset import DATA_DIR
+    from artf_clothes import DATA_DIR
 
     file_path = DATA_DIR / "artf_clothes_coco_categories.json"
     with open(file_path, "w") as f:
