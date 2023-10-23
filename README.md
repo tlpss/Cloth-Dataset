@@ -49,9 +49,9 @@ Make sure to add the dataset to the `data` folder in this repo.
 
 #### Local installation (required to run the postprocessing steps)
 
-- clone this repo
+- clone this repo (with submodules)
 - create the conda environment `conda env create -f environment.yaml`
-- initialize the pre-commit hooks `pre-commit install`
+-(initialize the pre-commit hooks `pre-commit install`)
 
 
 #### Obtaining desired dataset formats
