@@ -78,8 +78,8 @@ def order_tshirt_keypoints(keypoints_2D: np.ndarray, bbox: tuple):
 
     waist_left_idx = TSHIRT_KEYPOINTS.index("waist_left")
     waist_right_idx = TSHIRT_KEYPOINTS.index("waist_right")
-    waist_left_2D = keypoints_2D[waist_left_idx]
-    waist_right_2D = keypoints_2D[waist_right_idx]
+    waist_left_2D = keypoints_2D[waist_left_idx][:2]
+    waist_right_2D = keypoints_2D[waist_right_idx][:2]
 
     distance_waist_left = np.linalg.norm(np.array(waist_left_2D) - np.array(bottom_left_bbox_corner))
     distance_waist_right = np.linalg.norm(np.array(waist_right_2D) - np.array(bottom_left_bbox_corner))
