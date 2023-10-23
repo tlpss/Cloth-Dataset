@@ -86,13 +86,39 @@ def order_tshirt_keypoints(keypoints_2D: np.ndarray, bbox: tuple):
     shoulder_left_idx = TSHIRT_KEYPOINTS.index("shoulder_left")
     shoulder_right_idx = TSHIRT_KEYPOINTS.index("shoulder_right")
 
-    shoulder_left_2D = keypoints_2D[shoulder_left_idx]
-    shoulder_right_2D = keypoints_2D[shoulder_right_idx]
+    neck_left_idx = TSHIRT_KEYPOINTS.index("neck_left")
+    neck_right_idx = TSHIRT_KEYPOINTS.index("neck_right")
 
-    if shoulder_left_2D[0] < shoulder_right_2D[0]:
-        should_tshirt_be_flipped = False
-    else:
+    waist_left_idx = TSHIRT_KEYPOINTS.index("waist_left")
+    waist_right_idx = TSHIRT_KEYPOINTS.index("waist_right")
+
+    shoulder_left_2D = keypoints_2D[shoulder_left_idx]
+    keypoints_2D[shoulder_right_idx]
+
+    neck_left_2D = keypoints_2D[neck_left_idx]
+    neck_right_2D = keypoints_2D[neck_right_idx]
+
+    waist_left_2D = keypoints_2D[waist_left_idx]
+    waist_right_2D = keypoints_2D[waist_right_idx]
+
+    waist_center = (waist_left_2D + waist_right_2D) / 2
+    neck_center = (neck_left_2D + neck_right_2D) / 2
+
+    vertical_vector = neck_center - waist_center
+    vertical_vector /= np.linalg.norm(vertical_vector)
+
+    waist_to_left_shoulder_vector = shoulder_left_2D - waist_center
+
+    z_coord_of_cross_product = (
+        vertical_vector[0] * waist_to_left_shoulder_vector[1] - vertical_vector[1] * waist_to_left_shoulder_vector[0]
+    )
+
+    # origin  is topleft of image
+    # so positive z coord points down and implies the 'left kp' was actually on the right side of the body
+    if z_coord_of_cross_product > 0:
         should_tshirt_be_flipped = True
+    else:
+        should_tshirt_be_flipped = False
 
     if should_tshirt_be_flipped:
         for idx, keypoint in enumerate(TSHIRT_KEYPOINTS):

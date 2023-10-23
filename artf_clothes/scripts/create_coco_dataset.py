@@ -7,9 +7,12 @@ from airo_dataset_tools.data_parsers.coco import CocoKeypointsDataset
 from artf_clothes import DATA_DIR
 from artf_clothes.scripts.keypoint_ordering import order_keypoints
 
+np.random.seed(2023)  # fix seed to make splits reproducible
+
+
 # make sure the image paths are relative to the dataset root before converting to coco.
 
-resizing_resolutions = [(512, 256), (1024, 512)]
+resizing_resolutions = [(512, 256)]
 
 coco_categories_file = DATA_DIR / "artf_clothes_coco_categories.json"
 artf_dir = DATA_DIR / "aRTFClothes"
