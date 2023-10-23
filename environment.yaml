@@ -16,7 +16,6 @@ dependencies:
     - imageio
     - opencv-contrib-python # tested with 4.7.0.72
     - pre-commit
-    - mypy
     - -e airo-mono/airo-camera-toolkit
     - -e airo-mono/airo-spatial-algebra
     - -e airo-mono/airo-dataset-tools
