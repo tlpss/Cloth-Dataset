@@ -23,14 +23,24 @@ TOWEL_TEST_NAME = "towels-test"
 TSHIRT_TRAIN_NAME = "tshirts-train"
 TSHIRT_VAL_NAME = "tshirts-val"
 TSHIRT_TEST_NAME = "tshirts-test"
+SHORTS_TRAIN_NAME = "shorts-train"
+SHORTS_VAL_NAME = "shorts-val"
+SHORTS_TEST_NAME = "shorts-test"
 ALL_TRAIN = "all-train"
 ALL_TEST = "all-test"
 
-cvat_xml_base_names = [TOWEL_TRAIN_NAME, TOWEL_TEST_NAME, TSHIRT_TRAIN_NAME, TSHIRT_TEST_NAME]
+cvat_xml_base_names = [
+    TOWEL_TRAIN_NAME,
+    TOWEL_TEST_NAME,
+    TSHIRT_TRAIN_NAME,
+    TSHIRT_TEST_NAME,
+    SHORTS_TRAIN_NAME,
+    SHORTS_TEST_NAME,
+]
 
-train_names = [TOWEL_TRAIN_NAME, TSHIRT_TRAIN_NAME]
-val_names = [TOWEL_VAL_NAME, TSHIRT_VAL_NAME]
-test_names = [TOWEL_TEST_NAME, TSHIRT_TEST_NAME]
+train_names = [TOWEL_TRAIN_NAME, TSHIRT_TRAIN_NAME, SHORTS_TRAIN_NAME]
+val_names = [TOWEL_VAL_NAME, TSHIRT_VAL_NAME, SHORTS_VAL_NAME]
+test_names = [TOWEL_TEST_NAME, TSHIRT_TEST_NAME, SHORTS_TEST_NAME]
 all_names = [ALL_TRAIN, ALL_TEST]
 
 resize_names = []
@@ -64,7 +74,7 @@ for file_base_name in cvat_xml_base_names:
 
     #  split the train dataset into train and val
     if file_base_name in train_names:
-        coco_train, coco_val = split_coco_dataset(coco_keypoints_dataset, [0.9, 0.1], shuffle_before_splitting=True)
+        coco_train, coco_val = split_coco_dataset(coco_keypoints_dataset, [0.8, 0.2], shuffle_before_splitting=True)
         with open(artf_dir / f"{file_base_name}.json", "w") as f:
             json.dump(coco_train.dict(), f, indent=4, sort_keys=False)
         with open(artf_dir / f"{file_base_name.replace('-train','-val')}.json", "w") as f:

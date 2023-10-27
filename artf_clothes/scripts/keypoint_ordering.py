@@ -1,6 +1,8 @@
+from typing import Tuple
+
 import numpy as np
 
-from artf_clothes.keypoint_names import TSHIRT_KEYPOINTS
+from artf_clothes.keypoint_names import SHORTS_KEYPOINTS, TSHIRT_KEYPOINTS
 
 
 def order_keypoints(cloth_type, keypoints_2D, bbox):
@@ -8,6 +10,8 @@ def order_keypoints(cloth_type, keypoints_2D, bbox):
         keypoints_2D = order_towel_keypoints(keypoints_2D, bbox)
     elif cloth_type == "tshirt":
         keypoints_2D = order_tshirt_keypoints(keypoints_2D, bbox)
+    elif cloth_type == "shorts":
+        keypoints_2D = order_shorts_keypoints(keypoints_2D, bbox)
     else:
         raise ValueError(f"cloth_type {cloth_type} not supported for reorientation")
     return keypoints_2D
@@ -93,6 +97,35 @@ def order_tshirt_keypoints(keypoints_2D: np.ndarray, bbox: tuple):
         for idx, keypoint in enumerate(TSHIRT_KEYPOINTS):
             if "left" in keypoint:
                 right_idx = TSHIRT_KEYPOINTS.index(keypoint.replace("left", "right"))
+                # swap the rows in the numpy array, cannot do this as with lists
+                # https://stackoverflow.com/questions/21288044/row-exchange-in-numpy
+                keypoints_2D[[idx, right_idx]] = keypoints_2D[[right_idx, idx]]
+
+    return keypoints_2D
+
+
+def order_shorts_keypoints(keypoints_2D: np.ndarray, bbox: Tuple[int]) -> np.ndarray:
+    x_min, y_min, width, height = bbox
+
+    top_left_bbox_corner = (x_min, y_min)
+
+    waist_left_idx = SHORTS_KEYPOINTS.index("waist_left")
+    waist_right_idx = SHORTS_KEYPOINTS.index("waist_right")
+    waist_left_2D = keypoints_2D[waist_left_idx][:2]
+    waist_right_2D = keypoints_2D[waist_right_idx][:2]
+
+    distance_waist_left = np.linalg.norm(np.array(waist_left_2D) - np.array(top_left_bbox_corner))
+    distance_waist_right = np.linalg.norm(np.array(waist_right_2D) - np.array(top_left_bbox_corner))
+
+    if distance_waist_left > distance_waist_right:
+        should_shorts_be_flipped = True
+    else:
+        should_shorts_be_flipped = False
+
+    if should_shorts_be_flipped:
+        for idx, keypoint in enumerate(SHORTS_KEYPOINTS):
+            if "left" in keypoint:
+                right_idx = SHORTS_KEYPOINTS.index(keypoint.replace("left", "right"))
                 # swap the rows in the numpy array, cannot do this as with lists
                 # https://stackoverflow.com/questions/21288044/row-exchange-in-numpy
                 keypoints_2D[[idx, right_idx]] = keypoints_2D[[right_idx, idx]]
