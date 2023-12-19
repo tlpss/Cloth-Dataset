@@ -7,21 +7,18 @@ The aim of this dataset is to evaluate perception modules on a variety of cloth 
 
 
 
-TODO: add some images do demonstrate.
+![](docs/images/examples.png)
 
 
-Category|Split| # Scenes| # Cloth items| #images
----|---|---|---|---
-Towel | train | 6 | 15 | 210
-Towel | test | 8 | 20 | 400
-Tshirt | train | 6 | 15 | 210
-Tshirt | test | 8 | 20 | 400
-Shorts | train | 6 | 8 | 112
-Shorts | test | 8 | 9 | 180
-Boxershorts | train | 6 |  11 | 154
-Boxershorts | test | 8 |11 | 220
-Total | train | 6 | 49 | 686
-Total | test | 8 | 60 | 1200
+
+Category| # Scenes| | # Cloth items| | #images| |
+---|---|---|---|---|---|---|
+. | train | test | train | test | train | test
+Tshirt  | 6 |8 |  15| 20 | 210 | 400
+Towel  | 6 |8 |  15| 20 | 210 | 400
+Shorts | 6 | 8 | 8 | 9 | 112 | 180
+Boxershorts | 6 | 8 | 11 | 11 | 154 | 220
+Total |  6 | 8 | 49 |60 | 686 | 1200
 
 
 
@@ -29,14 +26,17 @@ Total | test | 8 | 60 | 1200
 
 
 ## Using this dataset
-TODO: provide download links etc.
 
+You can get the full RGB dataset with COCO-formatted annotations [here](https://cloud.ilabt.imec.be/index.php/s/ezqASWNLmEEcocQ/download/aRTFClothes-rgb.zip) (7GB).
+
+The resized splits used in the paper associated with the dataset can be found [here](https://cloud.ilabt.imec.be/index.php/apps/files/?dir=/Datasets/RTFClothes/synthetic-cloth-paper&fileid=1150006524).
 
 ----
 ## Dataset Creation
 
 ### Data capturing
-TODO
+We used a Zed2i camera and smartphone. Example scene is given below:
+![](docs/images/capture-homelab.jpg)
 ### Labeling
 CVAT was used for labeling. We set up CVAT locally and also used the serverless components to enable Segment-Anything, which we used for labeling segmentation masks of all cloth items. Keypoints were all manually labeled.
 
@@ -45,7 +45,7 @@ TODO: template + semantic labels for each category.
 
 
 ### Dataset Post-processing
-Make sure to add the dataset to the `data` folder in this repo.
+Make sure to download  he dataset to the `data` folder in this repo first.
 
 #### Local installation (required to run the postprocessing steps)
 
@@ -55,19 +55,20 @@ Make sure to add the dataset to the `data` folder in this repo.
 
 
 #### Obtaining desired dataset formats
-The labeled datasets can be exported from CVAT in the YOLO format (detection or segmentation) and the COCO instances format (detection/segmentation). The COCO keypoints format is atm only supported when skeletons are used. We do not use this but have an alternative flow in which we export the data in the CVAT Images format and then use custom code to convert that into a COCO Keypoints dataset.
 
-To create COCO keypoints datasets, we use the `airo-dataset-tools` package. A number of steps are bundled in [this](artf_clothes/scripts/create_coco_dataset.py) script:
+To create COCO keypoints datasets, we use the `airo-dataset-tools` package and perform following steps:
 
-1. Export the dataset annotations from cvat in their image format and save it in the parent dir of the dataset images
-2. Convert to COCO format using `airo-dataset-tools convert-cvat-to-coco-keypoints --add_segmentation  <path-to-cvat-xml `
+1. Export the dataset annotations from cvat in their image format and save the file in the parent directory of the dataset images
+2. create a coco categories file that describes the semantic classes, using the `scripts/create_coco_categories.py` script.
+
+2. Convert the cvat file to COCO format using `airo-dataset-tools convert-cvat-to-coco-keypoints --coco_categories <coco-categories-file> --add_segmentation  <path-to-cvat-xml> `
 3. (if needed) change the relative base of the image paths to match your coco dataset structure.
-
-
 4. inspect the dataset and annotations with Fiftyone to make sure all looks fine: `airo-dataset-tools fiftyone-coco-viewer <path-to-coco-json> -l keypoints -l segmentations -l detections`
 
 
 5. (TODO) convert to YOLO formats.
+
+A number of steps are bundled in [this](artf_clothes/scripts/create_coco_dataset.py) script.
 
 
 #### Resizing
