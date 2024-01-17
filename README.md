@@ -5,11 +5,13 @@ The almost-ready-to-fold part refers to the states of the clothes. We mimick the
 
 The aim of this dataset is to evaluate perception modules on a variety of cloth pieces for each category in a number of realistic environments. We hope this will help bring robots out of the labs into our everyday living environments.
 
-
 ![](docs/images/examples.png)
 
 
 
+
+
+The table below summarizes the dataset. Note that the scenes and cloth items for the train and test split are completely distinct to measure generalization across scenes and cloth items.
 Category| # Scenes| | # Cloth items| | #images| |
 ---|---|---|---|---|---|---|
 . | train | test | train | test | train | test
@@ -24,17 +26,25 @@ Total |  6 | 8 | 49 |60 | 686 | 1200
 
 
 
+Some additional examples taken from the tshirt test split:
+![](docs/images/fiftyone-tshirts-sample.png)
+
+
+
+
+
+
 ## Using this dataset
 
 You can get the full RGB dataset with COCO-formatted annotations [here](https://cloud.ilabt.imec.be/index.php/s/ezqASWNLmEEcocQ/download/aRTFClothes-rgb.zip) (7GB).
 
-The resized splits used in the paper associated with the dataset can be found [here](https://cloud.ilabt.imec.be/index.php/apps/files/?dir=/Datasets/RTFClothes/synthetic-cloth-paper&fileid=1150006524).
+The resized splits used in the [paper](https://arxiv.org/abs/2401.01734) associated with the dataset can be found [here](https://cloud.ilabt.imec.be/index.php/s/LN9f7towXfPSA9K).
 
 If you use this dataset, please cite it by refering to the [accompanying paper](https://arxiv.org/abs/2401.01734):
 ```bibtex
 
 @misc{lips2024learning,
-      title={Learning Keypoints for Robotic Cloth Manipulation using Synthetic Data}, 
+      title={Learning Keypoints for Robotic Cloth Manipulation using Synthetic Data},
       author={Thomas Lips and Victor-Louis De Gusseme and Francis wyffels},
       year={2024},
       eprint={2401.01734},
@@ -57,7 +67,7 @@ TODO: template + semantic labels for each category.
 
 
 ### Dataset Post-processing
-Make sure to download  he dataset to the `data` folder in this repo first.
+Make sure to download the dataset to the `data` folder in this repo first.
 
 #### Local installation (required to run the postprocessing steps)
 
@@ -68,7 +78,7 @@ Make sure to download  he dataset to the `data` folder in this repo first.
 
 #### Obtaining desired dataset formats
 
-To create COCO keypoints datasets, we use the `airo-dataset-tools` package and perform following steps:
+To create COCO keypoints datasets, we use the [`airo-dataset-tools`](https://github.com/airo-ugent/airo-mono/tree/main/airo-dataset-tools) package and take the following steps:
 
 1. Export the dataset annotations from cvat in their image format and save the file in the parent directory of the dataset images
 2. create a coco categories file that describes the semantic classes, using the `scripts/create_coco_categories.py` script.
@@ -77,8 +87,6 @@ To create COCO keypoints datasets, we use the `airo-dataset-tools` package and p
 3. (if needed) change the relative base of the image paths to match your coco dataset structure.
 4. inspect the dataset and annotations with Fiftyone to make sure all looks fine: `airo-dataset-tools fiftyone-coco-viewer <path-to-coco-json> -l keypoints -l segmentations -l detections`
 
-
-5. (TODO) convert to YOLO formats.
 
 A number of steps are bundled in [this](artf_clothes/scripts/create_coco_dataset.py) script.
 
