@@ -6,7 +6,6 @@ The almost-ready-to-fold part refers to the states of the clothes. We mimick the
 The aim of this dataset is to evaluate perception modules on a variety of cloth pieces for each category in a number of realistic environments. We hope this will help bring robots out of the labs into our everyday living environments.
 
 
-
 ![](docs/images/examples.png)
 
 
@@ -30,6 +29,19 @@ Total |  6 | 8 | 49 |60 | 686 | 1200
 You can get the full RGB dataset with COCO-formatted annotations [here](https://cloud.ilabt.imec.be/index.php/s/ezqASWNLmEEcocQ/download/aRTFClothes-rgb.zip) (7GB).
 
 The resized splits used in the paper associated with the dataset can be found [here](https://cloud.ilabt.imec.be/index.php/apps/files/?dir=/Datasets/RTFClothes/synthetic-cloth-paper&fileid=1150006524).
+
+If you use this dataset, please cite it by refering to the [accompanying paper](https://arxiv.org/abs/2401.01734):
+```bibtex
+
+@misc{lips2024learning,
+      title={Learning Keypoints for Robotic Cloth Manipulation using Synthetic Data}, 
+      author={Thomas Lips and Victor-Louis De Gusseme and Francis wyffels},
+      year={2024},
+      eprint={2401.01734},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
 
 ----
 ## Dataset Creation
