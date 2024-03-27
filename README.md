@@ -43,6 +43,10 @@ The resized splits used in the [paper](https://arxiv.org/abs/2401.01734) associa
 
 All data is also available on [Zenodo](https://doi.org/10.5281/zenodo.10875542).
 
+The dataset is CC-BY 4.0 licensed. The codebase is MIT Licensed.
+
+
+
 If you use this dataset, please cite it by refering to the [accompanying paper](https://arxiv.org/abs/2401.01734):
 ```bibtex
 
