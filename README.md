@@ -1,4 +1,5 @@
-# aRTF Clothes Dataset
+# aRTF Clothes Dataset [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10875542.svg)](https://doi.org/10.5281/zenodo.10875542)
+
 The aRTF (almost-ready-to-fold) Clothes dataset contains around 2000 images of various clothing items across 4 categories, in a variety of realistic (where a human/robot might do laundry folding) household settings.
 
 The almost-ready-to-fold part refers to the states of the clothes. We mimick the output of current SOTA robotic unfolding pipelines, which are capable but not yet perfect.
@@ -39,6 +40,8 @@ Some additional examples taken from the tshirt test split:
 You can get the full RGB dataset with COCO-formatted annotations [here](https://cloud.ilabt.imec.be/index.php/s/ezqASWNLmEEcocQ/download/aRTFClothes-rgb.zip) (7GB).
 
 The resized splits used in the [paper](https://arxiv.org/abs/2401.01734) associated with the dataset can be found [here](https://cloud.ilabt.imec.be/index.php/s/LN9f7towXfPSA9K).
+
+All data is also available on [Zenodo](https://doi.org/10.5281/zenodo.10875542).
 
 If you use this dataset, please cite it by refering to the [accompanying paper](https://arxiv.org/abs/2401.01734):
 ```bibtex
